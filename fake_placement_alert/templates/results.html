@@ -1,22 +1,99 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Check Result</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analysis Result | ThreatScanner</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div class="container">
-        <h1>Result</h1>
+    <div class="navbar">
+        <div class="nav-logo">🛡️ ThreatScanner</div>
+        <div class="nav-title">Placement Document Analyzer</div>
+    </div>
 
-        <h2 style="color: {{ color }};">{{ result }}</h2>
-        <p><b>Model Probability:</b> {{ probability }}</p>
+    <div class="container result-container">
+        
+        <div class="top-action">
+            <a href="/" class="btn btn-secondary">&larr; Analyze Another Document</a>
+        </div>
 
-        <h3>Message Checked:</h3>
-        <div class="message-box">{{ message }}</div>
+        <div class="result-header {{ color_class }}">
+            <div class="risk-badge">{{ risk_level }}</div>
+            <h2>{{ prediction }}</h2>
+        </div>
 
-        <br>
-        <a href="{{ url_for('index') }}">Check another message</a>
+        <div class="dashboard-grid">
+            <!-- Probability Card -->
+            <div class="card prob-card">
+                <h3>ML Probability Analysis</h3>
+                <div class="prob-bars">
+                    <div class="prob-row">
+                        <span class="prob-label">Fake Probability</span>
+                        <span class="prob-value">{{ fake_pct }}%</span>
+                    </div>
+                    <div class="prob-bar-bg">
+                        <div class="prob-bar-fill fill-fake" style="width: {{ fake_pct }}%"></div>
+                    </div>
+
+                    <div class="prob-row mt-3">
+                        <span class="prob-label">Genuine Probability</span>
+                        <span class="prob-value">{{ gen_pct }}%</span>
+                    </div>
+                    <div class="prob-bar-bg">
+                        <div class="prob-bar-fill fill-gen" style="width: {{ gen_pct }}%"></div>
+                    </div>
+                </div>
+                
+                <div class="metadata mt-4">
+                    <p><strong>Source:</strong> {{ filename }}</p>
+                    <p><strong>Length:</strong> {{ char_count }} characters</p>
+                </div>
+            </div>
+
+            <!-- Suspicious Content Card -->
+            <div class="card phrases-card">
+                <h3>⚠️ Suspicious Content Detected</h3>
+                {% if phrases %}
+                    <p class="text-sm mb-3 text-gray">The following phrases contributed to the model's prediction:</p>
+                    <div class="phrase-list">
+                        {% for phrase in phrases %}
+                        <div class="phrase-item severity-{{ phrase.severity }}">
+                            <div class="phrase-top">
+                                <span class="phrase-icon">
+                                    {% if phrase.severity == 'red' %}🔴{% else %}🟠{% endif %}
+                                </span>
+                                <span class="phrase-text">"{{ phrase.phrase }}"</span>
+                            </div>
+                            <div class="phrase-reason">
+                                <span class="badge badge-{{ phrase.severity }}">{{ phrase.category }}</span>
+                                {{ phrase.reason }}
+                            </div>
+                        </div>
+                        {% endendfor %}
+                    </div>
+                {% else %}
+                    <div class="no-issues">
+                        <span class="icon-large">✅</span>
+                        <p>No major suspicious indicators were detected in the text.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="card analyzed-text-card mt-4">
+            <h3>🔎 Analyzed Text</h3>
+            <p class="text-sm mb-3 text-gray">Suspicious phrases have been highlighted within the document context.</p>
+            <div class="document-viewer">
+                {{ highlighted_text | safe }}
+            </div>
+        </div>
+
+        <div class="disclaimer mt-4">
+            <p><strong>Disclaimer:</strong> This analysis is an automated risk assessment based on the document's text and detected patterns using a Machine Learning model. It does not independently verify the company, recruiter, email address, or authenticity of the offer.</p>
+        </div>
+
     </div>
 </body>
 </html>

@@ -2,3 +2,6 @@ Flask
 scikit-learn
 joblib
 gunicorn
+pdfplumber
+python-docx
+werkzeug
